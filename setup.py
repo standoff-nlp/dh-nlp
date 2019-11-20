@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='dh-nlp',
-      version='0.1',
+      version='0.2',
       description='Natural language processing for DH',
       url='https://github.com/standoff-nlp/dh-nlp',
       author='David Lassner',
