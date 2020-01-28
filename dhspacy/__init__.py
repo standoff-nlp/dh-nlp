@@ -7,11 +7,9 @@ def init(nlp):
 
 class DHDoc:
     
-    def __init__(self, text, standoff, doc, filtersets):
-        self.text = text
+    def __init__(self, text, standoff, doc):
         self.standoff = standoff
         self.doc = doc
-        self.filtersets = filtersets
 
     def get_char_inds(self, spacy_obj):
 
@@ -29,24 +27,11 @@ class DHDoc:
 
         begin_char_without_excludes = self.standoff["begin"] + begin_token.idx
 
-        num_excludes = self.filtersets.exclude_map[self.standoff["begin"]:begin_char_without_excludes].sum()
         begin_char = begin_char_without_excludes
-        while num_excludes > 0:
-            begin_char += 1
-            if self.filtersets.exclude_map[begin_char-1] == 1:
-                num_excludes += 1 
-            num_excludes -= 1
 
         end_char_without_excludes = begin_char + (end_token.idx - begin_token.idx) + len(end_token)
 
-        num_excludes = self.filtersets.exclude_map[begin_char:end_char_without_excludes].sum()
-
         end_char = end_char_without_excludes
-        while num_excludes > 0:
-            end_char += 1
-            if self.filtersets.exclude_map[end_char-1] == 1:
-                num_excludes += 1 
-            num_excludes -= 1
         return begin_char, end_char
 
 
@@ -58,13 +43,15 @@ class DHnlp:
 
     def __call__(self, filtersets):
 
-        if type(filtersets) != standoffconverter.Filter:
-            raise TypeError("filtersets has to be of type 'standoffconverter.Filter'.")
-        texts, standoffs = zip(*filtersets)
+        texts, standoffs = [],[]
+        for ap in filtersets:
+            texts.append(ap.get_text())
+            standoffs.append(ap.so.__dict__)
+
         spacified = list(self.nlp.pipe(texts))
 
         for text, standoff, doc in zip(texts, standoffs, spacified):
-            self.docs.append(DHDoc(text, standoff, doc, filtersets))
+            self.docs.append(DHDoc(text, standoff, doc))
 
         for doc in self.docs:
             yield doc

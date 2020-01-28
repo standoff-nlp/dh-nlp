@@ -9,7 +9,7 @@ import dhspacy
 input_xml = '''<W>
     <text type="a">
         <p label="CARDINAL">three</p>
-        <p type="b">The answer<del> not this</del> is 42.</p>
+        <p type="b">The answer is 42.</p>
         <p type="b">The answer is 43.</p>
         <p type="b">The answer is 44.</p>
         <p type="b">The answer is 45.</p>
@@ -27,10 +27,10 @@ class TestDHSpaCy(unittest.TestCase):
 
     def test_get_char_inds(self):
         tree = etree.fromstring(input_xml)
-        so = standoffconverter.Standoff.from_lxml_tree(tree)
+        so = standoffconverter.Converter.from_tree(tree)
 
-        filterset = standoffconverter.Filter(so).find("p").exclude("del")
-        
+
+        filterset = so.collection[0].xpath("//p")
         dhnlp = dhspacy.init(nlp)
 
         for dhdoc in dhnlp(filterset):
